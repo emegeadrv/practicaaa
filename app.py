@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, Response, jsonify, redirect, url_for
 import database as dbase  
 from product import Product
+from flask_pymongo import PyMongo
+from config import app
 
 db = dbase.dbConnection()
-
+mongo = PyMongo(app)
 app = Flask(__name__)
 
 #Rutas de la aplicación
@@ -17,9 +19,9 @@ def home():
 @app.route('/products', methods=['POST'])
 def addProduct():
     products = db['products']
-    name = request.form['name']
-    price = request.form['price']
-    quantity = request.form['quantity']
+    name = request.json['name']
+    price = request.json['price']
+    quantity = request.json['quantity']
 
     if name and price and quantity:
         product = Product(name, price, quantity)
@@ -44,9 +46,9 @@ def delete(product_name):
 @app.route('/edit/<string:product_name>', methods=['POST'])
 def edit(product_name):
     products = db['products']
-    name = request.form['name']
-    price = request.form['price']
-    quantity = request.form['quantity']
+    name = request.json['name']
+    price = request.json['price']
+    quantity = request.json['quantity']
 
     if name and price and quantity:
         products.update_one({'name' : product_name}, {'$set' : {'name' : name, 'price' : price, 'quantity' : quantity}})
